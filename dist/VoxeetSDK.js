@@ -98,6 +98,10 @@ var _VoxeetSDK = /** @class */ (function () {
     _VoxeetSDK.prototype.closeSession = function () {
         return RNVoxeetConferencekit.disconnect();
     };
+    _VoxeetSDK.prototype.defaultRearCamera = function (enable) {
+      RNVoxeetConferencekit.defaultRearCamera(enable);
+      return true;
+    };
     return _VoxeetSDK;
 }());
 export default _VoxeetSDK;

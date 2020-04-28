@@ -89,6 +89,11 @@ export default class _VoxeetSDK {
     return true;
   }
 
+  defaultRearCamera(enable: boolean): boolean {
+  RNVoxeetConferencekit.defaultRearCamera(enable);
+  return true;
+ }
+
   /*
     *  Android methods
     */

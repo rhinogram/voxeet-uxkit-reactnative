@@ -259,6 +259,13 @@ RCT_EXPORT_METHOD(defaultRearCamera:(BOOL)enable)
   });
 }
 
+RCT_EXPORT_METHOD(defaultMute:(BOOL)enable)
+{
+  dispatch_async(dispatch_get_main_queue(), ^{
+      VoxeetUXKit.shared.defaultMute = enable;
+  });
+}
+
 /*
  *  MARK: Oauth2 helpers
  */

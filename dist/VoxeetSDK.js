@@ -102,6 +102,10 @@ var _VoxeetSDK = /** @class */ (function () {
       RNVoxeetConferencekit.defaultRearCamera(enable);
       return true;
     };
+    _VoxeetSDK.prototype.defaultMute = function (enable) {
+      RNVoxeetConferencekit.defaultMute(enable);
+      return true;
+    };
     return _VoxeetSDK;
 }());
 export default _VoxeetSDK;

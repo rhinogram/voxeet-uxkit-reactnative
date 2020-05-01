@@ -64,7 +64,5 @@ dependencies {
     compile ('com.voxeet.sdk:uxkit-firebase:2.3.0')
 
     //use the latest toolkit
-    compile ('com.github.rhinogram:voxeet-uxkit-android:master-SNAPSHOT') {
-        transitive = true
-    }
+    implementation 'com.github.rhinogram:voxeet-uxkit-android:master-SNAPSHOT'
 }

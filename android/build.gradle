@@ -57,7 +57,7 @@ dependencies {
     compile ('com.voxeet.sdk:uxkit-firebase:2.3.0')
 
     //use the latest toolkit
-    compile ('com.voxeet.sdk:uxkit:2.3.0') {
+    compile ('com.github.Rhinogram:voxeet-uxkit-android:rhinovideo-SNAPSHOT') {
         transitive = true
     }
 }

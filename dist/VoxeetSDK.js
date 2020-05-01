@@ -66,6 +66,14 @@ var _VoxeetSDK = /** @class */ (function () {
         RNVoxeetConferencekit.defaultVideo(enable);
         return true;
     };
+    _VoxeetSDK.prototype.defaultRearCamera = function (enable) {
+        RNVoxeetConferencekit.defaultRearCamera(enable);
+        return true;
+    };
+    _VoxeetSDK.prototype.defaultMute = function (enable) {
+        RNVoxeetConferencekit.defaultMute(enable);
+        return true;
+    };
     /*
       *  Android methods
       */
@@ -97,14 +105,6 @@ var _VoxeetSDK = /** @class */ (function () {
     };
     _VoxeetSDK.prototype.closeSession = function () {
         return RNVoxeetConferencekit.disconnect();
-    };
-    _VoxeetSDK.prototype.defaultRearCamera = function (enable) {
-      RNVoxeetConferencekit.defaultRearCamera(enable);
-      return true;
-    };
-    _VoxeetSDK.prototype.defaultMute = function (enable) {
-      RNVoxeetConferencekit.defaultMute(enable);
-      return true;
     };
     return _VoxeetSDK;
 }());

@@ -22,9 +22,9 @@ export default class _VoxeetSDK {
     isAudio3DEnabled(): Promise<boolean>;
     appearMaximized(enable: boolean): boolean;
     defaultBuiltInSpeaker(enable: boolean): boolean;
+    defaultVideo(enable: boolean): boolean;
     defaultRearCamera(enable: boolean): boolean;
     defaultMute(enable: boolean): boolean;
-    defaultVideo(enable: boolean): boolean;
     screenAutoLock(activate: boolean): void;
     isUserLoggedIn(): Promise<boolean>;
     checkForAwaitingConference(): Promise<any>;

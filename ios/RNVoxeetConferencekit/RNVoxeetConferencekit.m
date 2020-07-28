@@ -11,7 +11,7 @@
 @import VoxeetSDK;
 @import VoxeetUXKit;
 
-@interface RNVoxeetConferencekit()
+@interface RNVoxeetConferencekit() <VTNotificationDelegate>
 
 @property (nonatomic, copy) void (^refreshAccessTokenClosure)(NSString *);
 
@@ -32,11 +32,42 @@ RCT_EXPORT_METHOD(initialize:(NSString *)consumerKey
     dispatch_async(dispatch_get_main_queue(), ^{
         VoxeetSDK.shared.notification.push.type = VTNotificationPushTypeCallKit;
         VoxeetSDK.shared.telemetry.platform = VTTelemetryPlatformReactNative;
-        
+
         [VoxeetSDK.shared initializeWithConsumerKey:consumerKey consumerSecret:consumerSecret];
         [VoxeetUXKit.shared initialize];
+        VoxeetSDK.shared.notification.delegate = self;
         resolve(nil);
     });
+}
+
+- (void)conferenceEndedWithNotification:(VTConferenceEndedNotification * _Nonnull)notification {
+    [self sendEventWithName:@"ConferenceDestroyedPush" body:notification.conferenceID];
+}
+
+- (void)conferenceStatusWithNotification:(VTConferenceStatusNotification * _Nonnull)notification {
+    [self conferenceStatusUpdatedEvent];
+}
+
+- (void)conferenceCreatedWithNotification:(VTConferenceCreatedNotification * _Nonnull)notification {
+
+}
+
+- (void)invitationReceivedWithNotification:(VTInvitationReceivedNotification * _Nonnull)notification {
+    [self sendEventWithName:@"ConferenceInvitationReceived" body:notification.conferenceID];
+}
+
+- (void)participantJoinedWithNotification:(VTParticipantJoinedNotification * _Nonnull)notification {
+    [self sendEventWithName:@"ConferenceParticipantJoined" body:notification.conferenceID];
+}
+
+- (void)participantLeftWithNotification:(VTParticipantLeftNotification * _Nonnull)notification {
+     [self sendEventWithName:@"ConferenceParticipantLeft" body:notification.conferenceID];
+}
+
+- (void) conferenceStatusUpdatedEvent {
+    bool left = VoxeetSDK.shared.conference.current.status == VTConferenceStatusLeft ||
+                VoxeetSDK.shared.conference.current.status == VTConferenceStatusLeaving;
+    [self sendEventWithName:@"ConferenceStatusUpdatedEvent" body: @{@"state": left ? @"LEFT" : @"OTHER" }];
 }
 
 RCT_EXPORT_METHOD(initializeToken:(NSString *)accessToken
@@ -46,7 +77,7 @@ RCT_EXPORT_METHOD(initializeToken:(NSString *)accessToken
     dispatch_async(dispatch_get_main_queue(), ^{
         VoxeetSDK.shared.notification.push.type = VTNotificationPushTypeCallKit;
         VoxeetSDK.shared.telemetry.platform = VTTelemetryPlatformReactNative;
-        
+
         [VoxeetSDK.shared initializeWithAccessToken:accessToken refreshTokenClosure:^(void (^closure)(NSString *)) {
             self.refreshAccessTokenClosure = closure;
             if (self->_hasListeners) {
@@ -54,7 +85,11 @@ RCT_EXPORT_METHOD(initializeToken:(NSString *)accessToken
             }
         }];
         [VoxeetUXKit.shared initialize];
-        
+        VoxeetSDK.shared.notification.delegate = self;
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(conferenceStatusUpdatedEvent)
+                                                     name:@"VTConferenceStateUpdated"
+                                                   object:nil];
         resolve(nil);
     });
 }
@@ -67,9 +102,9 @@ RCT_EXPORT_METHOD(connect:(NSDictionary *)userInfo
         NSString *externalID = [userInfo objectForKey:@"externalId"];
         NSString *name = [userInfo objectForKey:@"name"];
         NSString *avatarURL = [userInfo objectForKey:@"avatarUrl"];
-        
+
         VTParticipantInfo *participantInfo = [[VTParticipantInfo alloc] initWithExternalID:externalID name:name avatarURL:avatarURL];
-        
+
         [VoxeetSDK.shared.session openWithInfo:participantInfo completion:^(NSError *error) {
             if (error != nil) {
                 reject(@"connect_error", [error localizedDescription], nil);
@@ -102,7 +137,7 @@ RCT_EXPORT_METHOD(create:(NSDictionary *)options
     if ([options valueForKey:@"options"]) {
         options = [options valueForKey:@"options"];
     }
-    
+
     // Create conference options.
     VTConferenceOptions *conferenceOptions = [[VTConferenceOptions alloc] init];
     conferenceOptions.alias = [options valueForKey:@"alias"];
@@ -115,7 +150,7 @@ RCT_EXPORT_METHOD(create:(NSDictionary *)options
         conferenceOptions.params.ttl = [params valueForKey:@"ttl"];
         conferenceOptions.params.videoCodec = [params valueForKey:@"videoCodec"];
     }
-    
+
     // Create conference.
     dispatch_async(dispatch_get_main_queue(), ^{
         [VoxeetSDK.shared.conference createWithOptions:conferenceOptions success:^(VTConference *conference) {
@@ -135,7 +170,7 @@ RCT_EXPORT_METHOD(join:(NSString *)conferenceID
     if ([options valueForKey:@"options"]) {
         options = [options valueForKey:@"options"];
     }
-    
+
     // Join conference options.
     NSMutableDictionary *userInfo = [[NSMutableDictionary alloc] init];
     [userInfo setValue:[options valueForKey:@"alias"] forKey:@"conferenceAlias"];
@@ -143,7 +178,7 @@ RCT_EXPORT_METHOD(join:(NSString *)conferenceID
     if (user) {
         [userInfo setValue:[user valueForKey:@"type"] forKey:@"participantType"];
     }
-    
+
     // Join conference.
     dispatch_async(dispatch_get_main_queue(), ^{
         BOOL video = VoxeetSDK.shared.conference.defaultVideo;
@@ -176,16 +211,16 @@ RCT_EXPORT_METHOD(invite:(NSString *)conferenceID
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSMutableArray<VTParticipantInfo *> *participantInfos = [[NSMutableArray alloc] init];
-        
+
         for (NSDictionary *participant in participants) {
             NSString *externalID = [participant objectForKey:@"externalId"];
             NSString *name = [participant objectForKey:@"name"];
             NSString *avatarURL = [participant objectForKey:@"avatarUrl"];
-            
+
             VTParticipantInfo *participantInfo = [[VTParticipantInfo alloc] initWithExternalID:externalID name:name avatarURL:avatarURL];
             [participantInfos addObject:participantInfo];
         }
-        
+
         [VoxeetSDK.shared.conference fetchWithConferenceID:conferenceID completion:^(VTConference *conference) {
             [VoxeetSDK.shared.notification inviteWithConference:conference participantInfos:participantInfos completion:^(NSError *error) {
                 if (error != nil) {
@@ -266,7 +301,9 @@ RCT_EXPORT_METHOD(defaultVideo:(BOOL)enable)
 
 - (NSArray<NSString *> *)supportedEvents
 {
-    return @[@"refreshToken"];
+    return @[@"refreshToken", @"VoxeetEvent", @"ConferenceDestroyedPush",
+             @"ConferenceStatusUpdatedEvent", @"ConferenceInvitationReceived",
+             @"ConferenceParticipantJoined", @"ConferenceParticipantLeft"];
 }
 
 // Will be called when this module's first listener is added.
@@ -279,6 +316,11 @@ RCT_EXPORT_METHOD(defaultVideo:(BOOL)enable)
 - (void)stopObserving
 {
     _hasListeners = NO;
+}
+
+-(void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 RCT_EXPORT_METHOD(onAccessTokenOk:(NSString *)accessToken
@@ -335,22 +377,22 @@ RCT_EXPORT_METHOD(startConference:(NSString *)conferenceID
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSMutableArray *userIDs = [[NSMutableArray alloc] init];
-        
+
         for (NSDictionary *participant in participants) {
             [userIDs addObject:[participant objectForKey:@"externalId"]];
         }
-        
+
         [VoxeetSDK.shared.conference createWithParameters:@{@"conferenceAlias": conferenceID} success:^(NSDictionary<NSString *,id> *response) {
             NSString *confID = response[@"conferenceId"];
             BOOL isNew = response[@"isNew"];
             BOOL video = VoxeetSDK.shared.conference.defaultVideo;
-            
+
             [VoxeetSDK.shared.conference joinWithConferenceID:confID video:video userInfo:nil success:^(NSDictionary<NSString *,id> *response) {
                 resolve(response);
             } fail:^(NSError *error) {
                 reject(@"startConference_error", [error localizedDescription], nil);
             }];
-            
+
             if (isNew) {
                 [VoxeetSDK.shared.conference inviteWithConferenceID:confID externalIDs:userIDs completion:^(NSError *error) {}];
             }
@@ -384,9 +426,9 @@ RCT_EXPORT_METHOD(openSession:(NSDictionary *)userInfo
         NSString *externalID = [userInfo objectForKey:@"externalId"];
         NSString *name = [userInfo objectForKey:@"name"];
         NSString *avatarURL = [userInfo objectForKey:@"avatarUrl"];
-        
+
         VTParticipantInfo *participantInfo = [[VTParticipantInfo alloc] initWithExternalID:externalID name:name avatarURL:avatarURL];
-        
+
         [VoxeetSDK.shared.session openWithInfo:participantInfo completion:^(NSError *error) {
             if (error != nil) {
                 reject(@"connect_error", [error localizedDescription], nil);

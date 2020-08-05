@@ -18,6 +18,7 @@ public final class MediaStreamUtil {
         map.putString(RNVideoViewManager.PEER_ID, stream.peerId());
         map.putString(RNVideoViewManager.LABEL, stream.label());
         map.putString(RNVideoViewManager.STREAM_TYPE, stream.getType().name());
+        map.putBoolean(RNVideoViewManager.HAS_VIDEO, null != stream && stream.videoTracks().size() > 0);
         return map;
     }
 }

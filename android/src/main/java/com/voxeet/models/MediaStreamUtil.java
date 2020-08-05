@@ -16,7 +16,7 @@ public final class MediaStreamUtil {
     public static WritableMap toMap(@NonNull MediaStream stream) {
         WritableMap map = new WritableNativeMap();
         map.putString(RNVideoViewManager.PEER_ID, stream.peerId());
-        map.putString(RNVideoViewManager.LABEL, stream.peerId());
+        map.putString(RNVideoViewManager.LABEL, stream.label());
         map.putString(RNVideoViewManager.STREAM_TYPE, stream.getType().name());
         return map;
     }

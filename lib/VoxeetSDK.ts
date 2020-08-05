@@ -15,11 +15,6 @@ export interface TokenRefreshCallback {
 export default class _VoxeetSDK {
   refreshAccessTokenCallback: RefreshCallback|null = null;
 
-  const eventEmitter = Platform.OS == "android" ? DeviceEventEmitter : new NativeEventEmitter(RNVoxeetConferencekit);
-  eventEmitter.addListener("refreshToken", (e: Event) => {
-    this.refreshAccessTokenCallback && this.refreshAccessTokenCallback();
-  });
-  
   initialize(consumerKey: string, consumerSecret: string): Promise<any> {
       return RNVoxeetConferencekit.initialize(consumerKey, consumerSecret);
   }

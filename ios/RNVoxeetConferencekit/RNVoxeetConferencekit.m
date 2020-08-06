@@ -339,6 +339,21 @@ RCT_EXPORT_METHOD(onAccessTokenKo:(NSString *)error
     resolve(nil);
 }
 
+// RCT_EXPORT_METHOD(toggleCamera:(NSString *)message
+//                   resolve:(RCTPromiseResolveBlock)resolve
+//                   ejecter:(RCTPromiseRejectBlock)reject)
+// {
+//     dispatch_async(dispatch_get_main_queue(), ^{
+//         [VoxeetSDK.shared.command sendWithMessage:message completion:^(NSError *error) {
+//             if (error != nil) {
+//                 reject(@"sendBroadcastMessage_error", [error localizedDescription], nil);
+//             } else {
+//                 resolve(nil);
+//             }
+//         }];
+//     });
+// }
+
 /*
  *  MARK: Android compatibility methods
  */

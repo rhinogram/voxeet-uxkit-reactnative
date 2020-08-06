@@ -66,6 +66,14 @@ var _VoxeetSDK = /** @class */ (function () {
         RNVoxeetConferencekit.defaultVideo(enable);
         return true;
     };
+
+     /*
+      *  RhinoVideo methods
+      */
+    _VoxeetSDK.prototype.toggleCamera = function () {
+        return RNVoxeetConferencekit.toggleCamera();
+    };
+
     /*
       *  Android methods
       */

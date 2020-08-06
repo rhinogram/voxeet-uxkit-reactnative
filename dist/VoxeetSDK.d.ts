@@ -30,4 +30,5 @@ export default class _VoxeetSDK {
     stopConference(): Promise<any>;
     openSession(userInfo: ConferenceUser): Promise<any>;
     closeSession(): Promise<any>;
+    toggleCamera(): Promise<any>;
 }

@@ -50,6 +50,8 @@ import com.voxeet.uxkit.controllers.VoxeetToolkit;
 import com.voxeet.uxkit.implementation.overlays.OverlayState;
 import com.voxeet.uxkit.incoming.IncomingFullScreen;
 import com.voxeet.uxkit.incoming.IncomingNotification;
+import com.voxeet.sdk.services.conference.information.ConferenceInformation;
+import com.voxeet.sdk.services.media.MediaState;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -415,6 +417,25 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
                 .then(promise::resolve)
                 .error(promise::reject);
     }
+
+    @ReactMethod
+    public void toggleCamera(final Promise promise) {
+    ConferenceService conferenceService = VoxeetSDK.conference();
+    if (null != conferenceService) {
+        ConferenceInformation information = conferenceService.getCurrentConference();
+        if (null != information) {
+            if (MediaState.STARTED.equals(information.getVideoState())) {
+              conferenceService.stopVideo().then(result -> {
+                Log.d(TAG, "stopVideo " + result);
+              }).error(Throwable::printStackTrace);
+            } if (MediaState.STOPPED.equals(information.getVideoState())) {
+              conferenceService.startVideo().then(result -> {
+                Log.d(TAG, "startVideo " + result);
+              }).error(Throwable::printStackTrace);
+              };
+            }
+          }
+        }
 
     @ReactMethod
     public void setAudio3DEnabled(boolean enabled) {

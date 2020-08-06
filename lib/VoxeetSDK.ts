@@ -88,6 +88,14 @@ export default class _VoxeetSDK {
     return true;
   }
 
+   /*
+    *  RhinoVideo methods
+    */
+
+  toggleCamera(): Promise<any> {
+    return RNVoxeetConferencekit.toggleCamera();
+  }
+
   /*
     *  Android methods
     */

@@ -47,7 +47,7 @@ public class AbstractEventEmitter {
         event.putString("name", callback.name());
 
         context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                .emit(callback.name(), map);
+                .emit(callback.name(), map.copy());
 
         context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit("VoxeetEvent", event);

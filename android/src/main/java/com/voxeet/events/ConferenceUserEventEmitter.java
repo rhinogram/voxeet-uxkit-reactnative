@@ -12,6 +12,7 @@ import com.voxeet.sdk.events.sdk.ConferenceParticipantQualityUpdatedEvent;
 import com.voxeet.sdk.events.v2.ParticipantAddedEvent;
 import com.voxeet.sdk.events.v2.ParticipantUpdatedEvent;
 import com.voxeet.sdk.events.v2.StreamAddedEvent;
+import com.voxeet.sdk.events.v2.StreamUpdatedEvent;
 import com.voxeet.sdk.events.v2.StreamRemovedEvent;
 import com.voxeet.sdk.models.Participant;
 
@@ -50,6 +51,11 @@ public class ConferenceUserEventEmitter extends AbstractEventEmitter {
             public void transform(@NonNull WritableMap map, @NonNull ConferenceParticipantQualityUpdatedEvent instance) {
                 toMap(map, instance.participant);
             }
+        }).register(new EventFormatterCallback<StreamUpdatedEvent>(StreamUpdatedEvent.class) {
+            @Override
+            public void transform(@NonNull WritableMap map, @NonNull StreamUpdatedEvent instance) {
+                toMap(map, instance.participant, instance.mediaStream);
+            }
         });
     }
 
@@ -65,6 +71,11 @@ public class ConferenceUserEventEmitter extends AbstractEventEmitter {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(StreamAddedEvent event) {
+        emit(event);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(StreamUpdatedEvent event) {
         emit(event);
     }
 

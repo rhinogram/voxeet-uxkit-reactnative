@@ -52,6 +52,10 @@ import com.voxeet.uxkit.incoming.IncomingFullScreen;
 import com.voxeet.uxkit.incoming.IncomingNotification;
 import com.voxeet.sdk.services.conference.information.ConferenceInformation;
 import com.voxeet.sdk.services.media.MediaState;
+import com.voxeet.sdk.media.camera.CameraContext;
+import com.voxeet.sdk.views.VideoView;
+import com.voxeet.android.media.stream.MediaStreamType;
+import java.lang.ref.WeakReference;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -432,10 +436,50 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
               conferenceService.startVideo().then(result -> {
                 Log.d(TAG, "startVideo " + result);
               }).error(Throwable::printStackTrace);
-              };
-            }
-          }
+          };
         }
+      }
+    }
+
+@NonNull
+private WeakReference<VideoView> selfVideoView;
+
+@NonNull
+private WeakReference<VideoView> otherVideoView;
+
+@NonNull
+private VideoView getSelfVideoView() {
+    return selfVideoView.get();
+}
+
+@NonNull
+private VideoView getOtherVideoView() {
+    return otherVideoView.get();
+}
+
+@ReactMethod
+public void toggleFlip(final Promise promise) {
+  VoxeetSDK.mediaDevice().switchCamera()
+    .then(aBoolean -> {
+      CameraContext provider = VoxeetSDK.mediaDevice().getCameraContext();
+      String ownUserId = VoxeetSDK.session().getParticipantId();
+      VideoView selectedView = getOtherVideoView();
+      VideoView selfView = getSelfVideoView();
+
+      if (null != ownUserId) {
+        if (null != selectedView && ownUserId.equals(selectedView.getPeerId())) {
+            //only mirror the view in case of camera stream
+            MediaStreamType type = selectedView.current();
+            if (MediaStreamType.Camera.equals(type)) {
+                selectedView.setMirror(provider.isDefaultFrontFacing());
+            }
+        } else if (null != selfView && ownUserId.equals(selfView.getPeerId())) {
+            selfView.setMirror(provider.isDefaultFrontFacing());
+        }
+      }
+    }).error(Throwable::printStackTrace);
+  }
+
 
     @ReactMethod
     public void setAudio3DEnabled(boolean enabled) {

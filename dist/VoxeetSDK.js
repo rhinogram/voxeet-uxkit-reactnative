@@ -78,7 +78,7 @@ var _VoxeetSDK = /** @class */ (function () {
         return RNVoxeetConferencekit.toggleFlip();
     };
 
-    _VoxeetSDK.prototype.togglMute = function () {
+    _VoxeetSDK.prototype.toggleMute = function () {
         return RNVoxeetConferencekit.toggleMute();
     };
 

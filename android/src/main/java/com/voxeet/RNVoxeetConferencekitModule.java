@@ -441,6 +441,12 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
       }
     }
 
+  @ReactMethod
+  public void toggleMute(final Promise promise) {
+    boolean new_muted_state = !VoxeetSDK.conference().isMuted();
+    VoxeetSDK.conference().mute(new_muted_state);
+  }
+
 @NonNull
 private WeakReference<VideoView> selfVideoView;
 

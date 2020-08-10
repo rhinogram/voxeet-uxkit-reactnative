@@ -96,6 +96,14 @@ export default class _VoxeetSDK {
     return RNVoxeetConferencekit.toggleCamera();
   }
 
+  toggleFlip(): Promise<any> {
+    return RNVoxeetConferencekit.toggleFlip();
+  }
+
+  toggleMute(): Promise<any> {
+    return RNVoxeetConferencekit.toggleMute();
+  }
+
   /*
     *  Android methods
     */

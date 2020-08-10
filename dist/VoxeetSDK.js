@@ -74,6 +74,14 @@ var _VoxeetSDK = /** @class */ (function () {
         return RNVoxeetConferencekit.toggleCamera();
     };
 
+    _VoxeetSDK.prototype.togglFlip = function () {
+        return RNVoxeetConferencekit.toggleFlip();
+    };
+
+    _VoxeetSDK.prototype.togglMute = function () {
+        return RNVoxeetConferencekit.toggleMute();
+    };
+
     /*
       *  Android methods
       */

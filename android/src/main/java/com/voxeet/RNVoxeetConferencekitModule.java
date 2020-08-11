@@ -154,9 +154,9 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
 
         initNotificationCenter();
 
-        VoxeetToolkit
-                .initialize(application, EventBus.getDefault())
-                .enableOverlay(true);
+        // VoxeetToolkit
+        //         .initialize(application, EventBus.getDefault())
+        //         .enableOverlay(true);
 
         VoxeetSDK.instance().register(this);
     }
@@ -168,7 +168,7 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
                 //register notification only mode
                 .register(NotificationMode.OVERHEAD_INCOMING_CALL, new IncomingNotification())
                 //register full screen mode
-                .register(NotificationMode.FULLSCREEN_INCOMING_CALL, new IncomingFullScreen(RNIncomingCallActivity.class))
+                // .register(NotificationMode.FULLSCREEN_INCOMING_CALL, new IncomingFullScreen(RNIncomingCallActivity.class))
                 //activate fullscreen -> notification mode only
                 .setEnforcedNotificationMode(EnforcedNotificationMode.MIXED_INCOMING_CALL);
 
@@ -355,7 +355,7 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
             listener = null != user && "listener".equals(getString(user, "type"));
         }
 
-        VoxeetToolkit.instance().enable(VoxeetToolkit.instance().getConferenceToolkit());
+        // VoxeetToolkit.instance().enable(VoxeetToolkit.instance().getConferenceToolkit());
 
         Conference expected_conference = VoxeetSDK.conference().getConference(conferenceId);
 
@@ -431,9 +431,11 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
             if (MediaState.STARTED.equals(information.getVideoState())) {
               conferenceService.stopVideo().then(result -> {
                 Log.d(TAG, "stopVideo " + result);
+                promise.resolve(result);
               }).error(Throwable::printStackTrace);
             } if (MediaState.STOPPED.equals(information.getVideoState())) {
               conferenceService.startVideo().then(result -> {
+                promise.resolve(result);
                 Log.d(TAG, "startVideo " + result);
               }).error(Throwable::printStackTrace);
           };
@@ -509,8 +511,8 @@ public void toggleFlip(final Promise promise) {
 
     @ReactMethod
     public void appearMaximized(boolean activate) {
-        VoxeetToolkit.instance().getConferenceToolkit().setDefaultOverlayState(activate ?
-                OverlayState.EXPANDED : OverlayState.MINIMIZED);
+        // VoxeetToolkit.instance().getConferenceToolkit().setDefaultOverlayState(activate ?
+        //         OverlayState.EXPANDED : OverlayState.MINIMIZED);
     }
 
     @ReactMethod
@@ -550,7 +552,7 @@ public void toggleFlip(final Promise promise) {
             }
         }
 
-        VoxeetToolkit.instance().enable(ConferenceToolkitController.class);
+        // VoxeetToolkit.instance().enable(ConferenceToolkitController.class);
         VoxeetSDK.conference()
                 .join(conferenceAlias)
                 .then(conference -> {

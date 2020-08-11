@@ -81,7 +81,7 @@ public class RNIncomingBundleChecker {
 
             final ConferenceService conferenceService = VoxeetSDK.conference();
 
-            VoxeetToolkit.instance().enable(ConferenceToolkitController.class);
+            // VoxeetToolkit.instance().enable(ConferenceToolkitController.class);
 
             //TODO add inviter
             conferenceService.join(mConferenceId) //, info)

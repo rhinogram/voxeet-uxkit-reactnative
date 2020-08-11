@@ -74,7 +74,7 @@ var _VoxeetSDK = /** @class */ (function () {
         return RNVoxeetConferencekit.toggleCamera();
     };
 
-    _VoxeetSDK.prototype.togglFlip = function () {
+    _VoxeetSDK.prototype.toggleFlip = function () {
         return RNVoxeetConferencekit.toggleFlip();
     };
 

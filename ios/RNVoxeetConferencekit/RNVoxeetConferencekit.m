@@ -11,7 +11,7 @@
 @import VoxeetSDK;
 @import VoxeetUXKit;
 
-@interface RNVoxeetConferencekit() <VTNotificationDelegate>
+@interface RNVoxeetConferencekit()
 
 @property (nonatomic, copy) void (^refreshAccessTokenClosure)(NSString *);
 
@@ -35,40 +35,10 @@ RCT_EXPORT_METHOD(initialize:(NSString *)consumerKey
 
         [VoxeetSDK.shared initializeWithConsumerKey:consumerKey consumerSecret:consumerSecret];
         [VoxeetUXKit.shared initialize];
-        VoxeetSDK.shared.notification.delegate = self;
         resolve(nil);
     });
 }
 
-- (void)conferenceEndedWithNotification:(VTConferenceEndedNotification * _Nonnull)notification {
-    [self sendEventWithName:@"ConferenceDestroyedPush" body:notification.conferenceID];
-}
-
-- (void)conferenceStatusWithNotification:(VTConferenceStatusNotification * _Nonnull)notification {
-    [self conferenceStatusUpdatedEvent];
-}
-
-- (void)conferenceCreatedWithNotification:(VTConferenceCreatedNotification * _Nonnull)notification {
-
-}
-
-- (void)invitationReceivedWithNotification:(VTInvitationReceivedNotification * _Nonnull)notification {
-    [self sendEventWithName:@"ConferenceInvitationReceived" body:notification.conferenceID];
-}
-
-- (void)participantJoinedWithNotification:(VTParticipantJoinedNotification * _Nonnull)notification {
-    [self sendEventWithName:@"ConferenceParticipantJoined" body:notification.conferenceID];
-}
-
-- (void)participantLeftWithNotification:(VTParticipantLeftNotification * _Nonnull)notification {
-     [self sendEventWithName:@"ConferenceParticipantLeft" body:notification.conferenceID];
-}
-
-- (void) conferenceStatusUpdatedEvent {
-    bool left = VoxeetSDK.shared.conference.current.status == VTConferenceStatusLeft ||
-                VoxeetSDK.shared.conference.current.status == VTConferenceStatusLeaving;
-    [self sendEventWithName:@"ConferenceStatusUpdatedEvent" body: @{@"state": left ? @"LEFT" : @"OTHER" }];
-}
 
 RCT_EXPORT_METHOD(initializeToken:(NSString *)accessToken
                   resolve:(RCTPromiseResolveBlock)resolve
@@ -85,11 +55,6 @@ RCT_EXPORT_METHOD(initializeToken:(NSString *)accessToken
             }
         }];
         [VoxeetUXKit.shared initialize];
-        VoxeetSDK.shared.notification.delegate = self;
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(conferenceStatusUpdatedEvent)
-                                                     name:@"VTConferenceStateUpdated"
-                                                   object:nil];
         resolve(nil);
     });
 }
@@ -301,9 +266,7 @@ RCT_EXPORT_METHOD(defaultVideo:(BOOL)enable)
 
 - (NSArray<NSString *> *)supportedEvents
 {
-    return @[@"refreshToken", @"VoxeetEvent", @"ConferenceDestroyedPush",
-             @"ConferenceStatusUpdatedEvent", @"ConferenceInvitationReceived",
-             @"ConferenceParticipantJoined", @"ConferenceParticipantLeft"];
+    return @[@"refreshToken"];
 }
 
 // Will be called when this module's first listener is added.
@@ -338,21 +301,6 @@ RCT_EXPORT_METHOD(onAccessTokenKo:(NSString *)error
     self.refreshAccessTokenClosure(nil);
     resolve(nil);
 }
-
-// RCT_EXPORT_METHOD(toggleCamera:(NSString *)message
-//                   resolve:(RCTPromiseResolveBlock)resolve
-//                   ejecter:(RCTPromiseRejectBlock)reject)
-// {
-//     dispatch_async(dispatch_get_main_queue(), ^{
-//         [VoxeetSDK.shared.command sendWithMessage:message completion:^(NSError *error) {
-//             if (error != nil) {
-//                 reject(@"sendBroadcastMessage_error", [error localizedDescription], nil);
-//             } else {
-//                 resolve(nil);
-//             }
-//         }];
-//     });
-// }
 
 /*
  *  MARK: Android compatibility methods

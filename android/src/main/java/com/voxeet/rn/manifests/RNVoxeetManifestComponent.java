@@ -33,20 +33,11 @@ public final class RNVoxeetManifestComponent extends AbstractManifestComponentPr
         }
 
         Application application = (Application) context;
-        // VoxeetToolkit.initialize(application, EventBus.getDefault());
 
         RNVoxeetManifestComponent.root_view_provider = new RNRootViewProvider(application, VoxeetToolkit.instance());
-        // VoxeetToolkit.instance().setProvider(RNVoxeetManifestComponent.root_view_provider);
 
-        // VoxeetToolkit.instance().enableOverlay(true);
-
-        //force a default voxeet preferences manager
         //in sdk mode, no issues
         VoxeetPreferences.init(application, new VoxeetEnvironmentHolder(application));
-
-        //change the overlay used by default
-        // VoxeetToolkit.instance().getConferenceToolkit().setDefaultOverlayState(OverlayState.EXPANDED);
-        // VoxeetToolkit.instance().getReplayMessageToolkit().setDefaultOverlayState(OverlayState.EXPANDED);
 
         RNVoxeetConferencekitModule.initNotificationCenter();
     }

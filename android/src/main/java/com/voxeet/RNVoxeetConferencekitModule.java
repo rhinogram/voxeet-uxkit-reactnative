@@ -468,7 +468,6 @@ public void toggleFlip(final Promise promise) {
 
       if (null != ownUserId) {
         if (null != selectedView && ownUserId.equals(selectedView.getPeerId())) {
-            //only mirror the view in case of camera stream
             MediaStreamType type = selectedView.current();
             if (MediaStreamType.Camera.equals(type)) {
                 selectedView.setMirror(provider.isDefaultFrontFacing());

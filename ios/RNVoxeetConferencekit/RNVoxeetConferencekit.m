@@ -281,11 +281,6 @@ RCT_EXPORT_METHOD(defaultVideo:(BOOL)enable)
     _hasListeners = NO;
 }
 
--(void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
 RCT_EXPORT_METHOD(onAccessTokenOk:(NSString *)accessToken
                   resolve:(RCTPromiseResolveBlock)resolve
                   ejecter:(RCTPromiseRejectBlock)reject)

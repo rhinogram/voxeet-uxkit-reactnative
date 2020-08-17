@@ -154,10 +154,6 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
 
         initNotificationCenter();
 
-        // VoxeetToolkit
-        //         .initialize(application, EventBus.getDefault())
-        //         .enableOverlay(true);
-
         VoxeetSDK.instance().register(this);
     }
 
@@ -167,8 +163,6 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
         NotificationCenter.instance.register(NotificationMode.FULLSCREEN_INCOMING_CALL, new VersionFilter(VersionFilter.ALL, 29))
                 //register notification only mode
                 .register(NotificationMode.OVERHEAD_INCOMING_CALL, new IncomingNotification())
-                //register full screen mode
-                // .register(NotificationMode.FULLSCREEN_INCOMING_CALL, new IncomingFullScreen(RNIncomingCallActivity.class))
                 //activate fullscreen -> notification mode only
                 .setEnforcedNotificationMode(EnforcedNotificationMode.MIXED_INCOMING_CALL);
 
@@ -355,8 +349,6 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
             listener = null != user && "listener".equals(getString(user, "type"));
         }
 
-        // VoxeetToolkit.instance().enable(VoxeetToolkit.instance().getConferenceToolkit());
-
         Conference expected_conference = VoxeetSDK.conference().getConference(conferenceId);
 
         if(null == expected_conference) {
@@ -511,8 +503,6 @@ public void toggleFlip(final Promise promise) {
 
     @ReactMethod
     public void appearMaximized(boolean activate) {
-        // VoxeetToolkit.instance().getConferenceToolkit().setDefaultOverlayState(activate ?
-        //         OverlayState.EXPANDED : OverlayState.MINIMIZED);
     }
 
     @ReactMethod
@@ -552,7 +542,6 @@ public void toggleFlip(final Promise promise) {
             }
         }
 
-        // VoxeetToolkit.instance().enable(ConferenceToolkitController.class);
         VoxeetSDK.conference()
                 .join(conferenceAlias)
                 .then(conference -> {

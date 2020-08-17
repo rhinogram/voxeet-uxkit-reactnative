@@ -425,7 +425,7 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
                 Log.d(TAG, "stopVideo " + result);
                 promise.resolve(result);
               }).error(Throwable::printStackTrace);
-            } if (MediaState.STOPPED.equals(information.getVideoState())) {
+            } else if (MediaState.STOPPED.equals(information.getVideoState())) {
               conferenceService.startVideo().then(result -> {
                 promise.resolve(result);
                 Log.d(TAG, "startVideo " + result);

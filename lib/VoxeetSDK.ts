@@ -15,7 +15,6 @@ export interface TokenRefreshCallback {
 export default class _VoxeetSDK {
   refreshAccessTokenCallback: RefreshCallback|null = null;
 
-
   initialize(consumerKey: string, consumerSecret: string): Promise<any> {
       return RNVoxeetConferencekit.initialize(consumerKey, consumerSecret);
   }
@@ -87,6 +86,22 @@ export default class _VoxeetSDK {
   defaultVideo(enable: boolean): boolean {
     RNVoxeetConferencekit.defaultVideo(enable);
     return true;
+  }
+
+   /*
+    *  RhinoVideo methods
+    */
+
+  toggleCamera(): Promise<any> {
+    return RNVoxeetConferencekit.toggleCamera();
+  }
+
+  toggleFlip(): Promise<any> {
+    return RNVoxeetConferencekit.toggleFlip();
+  }
+
+  toggleMute(): Promise<any> {
+    return RNVoxeetConferencekit.toggleMute();
   }
 
   /*

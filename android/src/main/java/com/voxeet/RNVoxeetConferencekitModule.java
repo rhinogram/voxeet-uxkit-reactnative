@@ -50,6 +50,12 @@ import com.voxeet.uxkit.controllers.VoxeetToolkit;
 import com.voxeet.uxkit.implementation.overlays.OverlayState;
 import com.voxeet.uxkit.incoming.IncomingFullScreen;
 import com.voxeet.uxkit.incoming.IncomingNotification;
+import com.voxeet.sdk.services.conference.information.ConferenceInformation;
+import com.voxeet.sdk.services.media.MediaState;
+import com.voxeet.sdk.media.camera.CameraContext;
+import com.voxeet.sdk.views.VideoView;
+import com.voxeet.android.media.stream.MediaStreamType;
+import java.lang.ref.WeakReference;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -148,10 +154,6 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
 
         initNotificationCenter();
 
-        VoxeetToolkit
-                .initialize(application, EventBus.getDefault())
-                .enableOverlay(true);
-
         VoxeetSDK.instance().register(this);
     }
 
@@ -161,8 +163,6 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
         NotificationCenter.instance.register(NotificationMode.FULLSCREEN_INCOMING_CALL, new VersionFilter(VersionFilter.ALL, 29))
                 //register notification only mode
                 .register(NotificationMode.OVERHEAD_INCOMING_CALL, new IncomingNotification())
-                //register full screen mode
-                .register(NotificationMode.FULLSCREEN_INCOMING_CALL, new IncomingFullScreen(RNIncomingCallActivity.class))
                 //activate fullscreen -> notification mode only
                 .setEnforcedNotificationMode(EnforcedNotificationMode.MIXED_INCOMING_CALL);
 
@@ -349,8 +349,6 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
             listener = null != user && "listener".equals(getString(user, "type"));
         }
 
-        VoxeetToolkit.instance().enable(VoxeetToolkit.instance().getConferenceToolkit());
-
         Conference expected_conference = VoxeetSDK.conference().getConference(conferenceId);
 
         if(null == expected_conference) {
@@ -417,6 +415,72 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void toggleCamera(final Promise promise) {
+    ConferenceService conferenceService = VoxeetSDK.conference();
+    if (null != conferenceService) {
+        ConferenceInformation information = conferenceService.getCurrentConference();
+        if (null != information) {
+            if (MediaState.STARTED.equals(information.getVideoState())) {
+              conferenceService.stopVideo().then(result -> {
+                Log.d(TAG, "stopVideo " + result);
+                promise.resolve(result);
+              }).error(Throwable::printStackTrace);
+            } else if (MediaState.STOPPED.equals(information.getVideoState())) {
+              conferenceService.startVideo().then(result -> {
+                promise.resolve(result);
+                Log.d(TAG, "startVideo " + result);
+              }).error(Throwable::printStackTrace);
+          };
+        }
+      }
+    }
+
+  @ReactMethod
+  public void toggleMute(final Promise promise) {
+    boolean new_muted_state = !VoxeetSDK.conference().isMuted();
+    VoxeetSDK.conference().mute(new_muted_state);
+  }
+
+@NonNull
+private WeakReference<VideoView> selfVideoView;
+
+@NonNull
+private WeakReference<VideoView> otherVideoView;
+
+@NonNull
+private VideoView getSelfVideoView() {
+    return selfVideoView.get();
+}
+
+@NonNull
+private VideoView getOtherVideoView() {
+    return otherVideoView.get();
+}
+
+@ReactMethod
+public void toggleFlip(final Promise promise) {
+  VoxeetSDK.mediaDevice().switchCamera()
+    .then(aBoolean -> {
+      CameraContext provider = VoxeetSDK.mediaDevice().getCameraContext();
+      String ownUserId = VoxeetSDK.session().getParticipantId();
+      VideoView selectedView = getOtherVideoView();
+      VideoView selfView = getSelfVideoView();
+
+      if (null != ownUserId) {
+        if (null != selectedView && ownUserId.equals(selectedView.getPeerId())) {
+            MediaStreamType type = selectedView.current();
+            if (MediaStreamType.Camera.equals(type)) {
+                selectedView.setMirror(provider.isDefaultFrontFacing());
+            }
+        } else if (null != selfView && ownUserId.equals(selfView.getPeerId())) {
+            selfView.setMirror(provider.isDefaultFrontFacing());
+        }
+      }
+    }).error(Throwable::printStackTrace);
+  }
+
+
+    @ReactMethod
     public void setAudio3DEnabled(boolean enabled) {
         VoxeetSDK.mediaDevice().setAudio3DEnabled(enabled);
     }
@@ -438,8 +502,6 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void appearMaximized(boolean activate) {
-        VoxeetToolkit.instance().getConferenceToolkit().setDefaultOverlayState(activate ?
-                OverlayState.EXPANDED : OverlayState.MINIMIZED);
     }
 
     @ReactMethod
@@ -479,7 +541,6 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
             }
         }
 
-        VoxeetToolkit.instance().enable(ConferenceToolkitController.class);
         VoxeetSDK.conference()
                 .join(conferenceAlias)
                 .then(conference -> {

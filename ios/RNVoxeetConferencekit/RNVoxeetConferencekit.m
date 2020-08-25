@@ -11,7 +11,7 @@
 @import VoxeetSDK;
 @import VoxeetUXKit;
 
-@interface RNVoxeetConferencekit()
+@interface RNVoxeetConferencekit() <VTNotificationDelegate>
 
 @property (nonatomic, copy) void (^refreshAccessTokenClosure)(NSString *);
 
@@ -35,10 +35,47 @@ RCT_EXPORT_METHOD(initialize:(NSString *)consumerKey
 
         [VoxeetSDK.shared initializeWithConsumerKey:consumerKey consumerSecret:consumerSecret];
         [VoxeetUXKit.shared initialize];
+        VoxeetSDK.shared.notification.delegate = self;
         resolve(nil);
     });
 }
 
+- (void)conferenceEndedWithNotification:(VTConferenceEndedNotification * _Nonnull)notification {
+    [self sendEventWithName:@"ConferenceDestroyedPush" body:notification.conferenceID];
+}
+
+- (void)conferenceStatusWithNotification:(VTConferenceStatusNotification * _Nonnull)notification {
+    [self conferenceStatusUpdatedEvent];
+}
+
+- (void)conferenceCreatedWithNotification:(VTConferenceCreatedNotification * _Nonnull)notification {
+
+}
+
+- (void)invitationReceivedWithNotification:(VTInvitationReceivedNotification * _Nonnull)notification {
+    [self sendEventWithName:@"ConferenceInvitationReceived" body:notification.conferenceID];
+}
+
+- (void)participantJoined:(NSNotification * _Nonnull)notification {
+  [self sendEventWithName:@"participantJoined" body: notification.name];
+}
+
+- (void)streamUpdated:(VTParticipant *)participant mediaStream:(MediaStream *)notification {
+  [self sendEventWithName:@"streamUpdated" body: notification.streamId];
+}
+- (void)streamAdded:(VTParticipant * _Nonnull)participant mediaStream:(MediaStream * _Nonnull)notification {
+  [self sendEventWithName:@"streamAdded" body: notification.streamId];
+}
+
+- (void)participantLeftWithNotification:(VTParticipantLeftNotification * _Nonnull)notification {
+     [self sendEventWithName:@"ConferenceParticipantLeft" body:notification.conferenceID];
+}
+
+- (void) conferenceStatusUpdatedEvent {
+    bool left = VoxeetSDK.shared.conference.current.status == VTConferenceStatusLeft ||
+                VoxeetSDK.shared.conference.current.status == VTConferenceStatusLeaving;
+    [self sendEventWithName:@"ConferenceStatusUpdatedEvent" body: @{@"state": left ? @"LEFT" : @"OTHER" }];
+}
 
 RCT_EXPORT_METHOD(initializeToken:(NSString *)accessToken
                   resolve:(RCTPromiseResolveBlock)resolve
@@ -55,6 +92,24 @@ RCT_EXPORT_METHOD(initializeToken:(NSString *)accessToken
             }
         }];
         [VoxeetUXKit.shared initialize];
+        VoxeetSDK.shared.notification.delegate = self;
+        VoxeetSDK.shared.conference.delegate = self;
+        [[NSNotificationCenter defaultCenter] addObserver:self
+        selector:@selector(conferenceStatusUpdatedEvent)
+        name:@"VTConferenceStateUpdated"
+        object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+        selector:@selector(participantJoined:)
+        name:@"VTParticipantJoined"
+        object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+        selector:@selector(participantJoined:)
+        name:@"streamAddedWithParticipant"
+        object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+        selector:@selector(participantJoined:)
+        name:@"streamUpdatedWithParticipant"
+        object:nil];
         resolve(nil);
     });
 }
@@ -213,6 +268,43 @@ RCT_EXPORT_METHOD(sendBroadcastMessage:(NSString *)message
     });
 }
 
+/*
+ *  RhinoVideo methods
+ */
+ //
+ // RCT_EXPORT_METHOD(toggleCamera:(RCTPromiseResolveBlock)resolve
+ //                   ejecter:(RCTPromiseRejectBlock)reject)
+ // {
+ //     dispatch_async(dispatch_get_main_queue(), ^{
+ //         [VoxeetSDK.shared.conference startVideoWithParticipant:^(NSError *error) {
+ //             if (error != nil) {
+ //                 reject(@"leave_error", [error localizedDescription], nil);
+ //             } else {
+ //                 resolve(nil);
+ //             }
+ //         }];
+ //     });
+ // }
+
+ //
+ // RCT_EXPORT_METHOD(toggleFlip:(NSString *)message
+ //                   resolve:(RCTPromiseResolveBlock)resolve
+ //                   ejecter:(RCTPromiseRejectBlock)reject)
+ // {
+ //     dispatch_async(dispatch_get_main_queue(), ^{
+ //         [VoxeetSDK.shared.conference startVideo]
+ //     });
+ // }
+
+ // RCT_EXPORT_METHOD(toggleMute:(NSString *)message
+ //                   resolve:(RCTPromiseResolveBlock)resolve
+ //                   ejecter:(RCTPromiseRejectBlock)reject)
+ // {
+ //     dispatch_async(dispatch_get_main_queue(), ^{
+ //         [VoxeetSDK.shared.conference startVideo]
+ //     });
+ // }
+
 RCT_EXPORT_METHOD(appearMaximized:(BOOL)enable)
 {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -266,7 +358,9 @@ RCT_EXPORT_METHOD(defaultVideo:(BOOL)enable)
 
 - (NSArray<NSString *> *)supportedEvents
 {
-    return @[@"refreshToken"];
+    return @[@"refreshToken", @"VoxeetEvent", @"ConferenceDestroyedPush",
+             @"ConferenceStatusUpdatedEvent", @"ConferenceInvitationReceived",
+             @"ConferenceParticipantJoined", @"ConferenceParticipantLeft", @"participantJoined"];
 }
 
 // Will be called when this module's first listener is added.
@@ -279,6 +373,11 @@ RCT_EXPORT_METHOD(defaultVideo:(BOOL)enable)
 - (void)stopObserving
 {
     _hasListeners = NO;
+}
+
+-(void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 RCT_EXPORT_METHOD(onAccessTokenOk:(NSString *)accessToken
@@ -374,6 +473,8 @@ RCT_EXPORT_METHOD(stopConference:(RCTPromiseResolveBlock)resolve
         }];
     });
 }
+
+
 
 /* Deprecated */
 RCT_EXPORT_METHOD(openSession:(NSDictionary *)userInfo

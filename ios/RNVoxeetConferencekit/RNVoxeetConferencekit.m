@@ -56,15 +56,23 @@ RCT_EXPORT_METHOD(initialize:(NSString *)consumerKey
     [self sendEventWithName:@"ConferenceInvitationReceived" body:notification.conferenceID];
 }
 
-- (void)participantJoined:(NSNotification * _Nonnull)notification {
-  [self sendEventWithName:@"participantJoined" body: notification.name];
+- (void)participantAdded:(NSNotification * _Nonnull)notification {
+  [self sendEventWithName:@"participantAdded" body: notification.userInfo];
 }
 
-- (void)streamUpdated:(VTParticipant *)participant mediaStream:(MediaStream *)notification {
-  [self sendEventWithName:@"streamUpdated" body: notification.streamId];
+- (void)participantUpdated:(NSNotification * _Nonnull)notification {
+  [self sendEventWithName:@"participantUpdated" body: notification.userInfo];
 }
-- (void)streamAdded:(VTParticipant * _Nonnull)participant mediaStream:(MediaStream * _Nonnull)notification {
-  [self sendEventWithName:@"streamAdded" body: notification.streamId];
+
+- (void)streamUpdated:(NSNotification * _Nonnull)participant mediaStream:(MediaStream *)notification {
+  [self sendEventWithName:@"streamUpdated" body: notification.userInfo];
+}
+- (void)streamAdded:(NSNotification * _Nonnull)participant mediaStream:(MediaStream * _Nonnull)notification {
+  [self sendEventWithName:@"streamAdded" body: notification.userInfo];
+}
+
+- (void)streamRemoved:(NSNotification * _Nonnull)participant mediaStream:(MediaStream * _Nonnull)notification {
+  [self sendEventWithName:@"streamRemoved" body: notification.userInfo];
 }
 
 - (void)participantLeftWithNotification:(VTParticipantLeftNotification * _Nonnull)notification {
@@ -99,16 +107,24 @@ RCT_EXPORT_METHOD(initializeToken:(NSString *)accessToken
         name:@"VTConferenceStateUpdated"
         object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self
-        selector:@selector(participantJoined:)
-        name:@"VTParticipantJoined"
+        selector:@selector(participantUpdated:)
+        name:@"participantUpdated"
         object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self
-        selector:@selector(participantJoined:)
-        name:@"streamAddedWithParticipant"
+        selector:@selector(participantAdded:)
+        name:@"participantAdded"
         object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self
-        selector:@selector(participantJoined:)
-        name:@"streamUpdatedWithParticipant"
+        selector:@selector(streamAdded:)
+        name:@"streamAdded"
+        object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+        selector:@selector(streamUpdated:)
+        name:@"streamUpdated"
+        object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+        selector:@selector(streamRemoved:)
+        name:@"streamRemoved"
         object:nil];
         resolve(nil);
     });
@@ -360,7 +376,9 @@ RCT_EXPORT_METHOD(defaultVideo:(BOOL)enable)
 {
     return @[@"refreshToken", @"VoxeetEvent", @"ConferenceDestroyedPush",
              @"ConferenceStatusUpdatedEvent", @"ConferenceInvitationReceived",
-             @"ConferenceParticipantJoined", @"ConferenceParticipantLeft", @"participantJoined"];
+             @"ConferenceParticipantJoined", @"ConferenceParticipantLeft",
+             @"participantJoined", @"participantUpdated", @"participantAdded",
+            @"streamUpdated", @"streamAdded", @"streamRemoved"];
 }
 
 // Will be called when this module's first listener is added.

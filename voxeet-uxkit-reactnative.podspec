@@ -9,7 +9,7 @@ Pod::Spec.new do |spec|
   spec.license = "MIT"
   spec.author = "Voxeet"
   spec.homepage = "https://dolby.io"
-  spec.platform = :ios, "9.0"
+  spec.platform = :ios, "11.0"
   spec.swift_version = "5.2.4"
   spec.source = { :git => "https://github.com/voxeet/voxeet-uxkit-reactnative.git", :tag => "v#{spec.version}" }
   spec.source_files  = "ios/**/*.{h,m}"
@@ -17,4 +17,5 @@ Pod::Spec.new do |spec|
   spec.dependency "React"
   spec.dependency "VoxeetUXKit", "1.3.4"
   spec.dependency "VoxeetSDK", "2.4.0"
+  spec.source = { :http => "https://vox-ios-sdk.s3.us-east-1.amazonaws.com/sdk/ios/release/#{spec.version}/VoxeetSDK.zip" }
 end

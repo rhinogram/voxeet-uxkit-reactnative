@@ -251,7 +251,7 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
 
         if (isConnected() && isSameUser(info)) {
             checkForIncomingConference();
-            promise.resolve(true);
+            promise.resolve(info);
             return;
         }
         VoxeetSDK.session()
@@ -324,7 +324,10 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
                 .then(result -> {
                     promise.resolve(ConferenceUtil.toMap(result));
                 })
-                .error(promise::reject);
+                .error(error -> {
+                    error.printStackTrace();
+                    promise.reject(error);
+                });
     }
 
     @ReactMethod

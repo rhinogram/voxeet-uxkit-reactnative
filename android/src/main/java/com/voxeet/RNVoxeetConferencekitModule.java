@@ -251,7 +251,7 @@ public class RNVoxeetConferencekitModule extends ReactContextBaseJavaModule {
 
         if (isConnected() && isSameUser(info)) {
             checkForIncomingConference();
-            promise.resolve(info);
+            promise.resolve(true);
             return;
         }
         VoxeetSDK.session()

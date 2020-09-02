@@ -17,5 +17,4 @@ Pod::Spec.new do |spec|
   spec.dependency "React"
   spec.dependency "VoxeetUXKit", "1.3.4"
   spec.dependency "VoxeetSDK", "2.4.0"
-  spec.source = { :http => "https://vox-ios-sdk.s3.us-east-1.amazonaws.com/sdk/ios/release/#{spec.version}/VoxeetSDK.zip" }
 end

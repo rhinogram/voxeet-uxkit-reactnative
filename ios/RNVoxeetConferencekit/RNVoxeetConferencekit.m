@@ -64,14 +64,14 @@ RCT_EXPORT_METHOD(initialize:(NSString *)consumerKey
   [self sendEventWithName:@"participantUpdated" body: notification.userInfo];
 }
 
-- (void)streamUpdated:(NSNotification * _Nonnull)participant mediaStream:(MediaStream *)notification {
+- (void)streamUpdated:(NSNotification * _Nonnull)notification {
   [self sendEventWithName:@"streamUpdated" body: notification.userInfo];
 }
-- (void)streamAdded:(NSNotification * _Nonnull)participant mediaStream:(MediaStream * _Nonnull)notification {
+- (void)streamAdded:(NSNotification * _Nonnull)notification {
   [self sendEventWithName:@"streamAdded" body: notification.userInfo];
 }
 
-- (void)streamRemoved:(NSNotification * _Nonnull)participant mediaStream:(MediaStream * _Nonnull)notification {
+- (void)streamRemoved:(NSNotification * _Nonnull)notification {
   [self sendEventWithName:@"streamRemoved" body: notification.userInfo];
 }
 
